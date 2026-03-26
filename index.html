@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云端网盘</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+        }
+        .file-list {
+            margin-top: 30px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>云端网盘</h1>
+    
+    <div class="upload-section">
+        <h2>上传文件</h2>
+        <input type="file" id="fileInput" multiple>
+        <button onclick="uploadFile()">上传</button>
+    </div>
+    
+    <div class="file-list">
+        <h2>已上传文件</h2>
+        <div id="fileList"></div>
+    </div>
+
+    <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('请选择要上传的文件');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                alert('文件上传成功！');
+                loadFileList();
+                fileInput.value = '';
+            } catch (error) {
+                console.error('上传失败:', error);
+                alert('文件上传失败');
+            }
+        }
+
+        async function loadFileList() {
+            try {
+                const response = await fetch('/api/files');
+                const files = await response.json();
+                const fileListDiv = document.getElementById('fileList');
+                fileListDiv.innerHTML = '';
+
+                files.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <span>${file.name}</span>
+                        <a href="${file.downloadUrl}" target="_blank" download>下载</a>
+                    `;
+                    fileListDiv.appendChild(fileItem);
+                });
+            } catch (error) {
+                console.error('获取文件列表失败:', error);
+            }
+        }
+
+        // 页面加载时获取文件列表
+        window.onload = loadFileList;
+    </script>
+</body>
+</html>
