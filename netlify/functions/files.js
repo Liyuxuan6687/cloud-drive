@@ -1,32 +1,14 @@
-const fs = require('fs');
-const path = require('path');
-
 exports.handler = async (event, context) => {
   try {
-    const uploadDir = path.join(process.cwd(), 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      return {
-        statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify([])
-      };
-    }
-    
-    const files = fs.readdirSync(uploadDir).map(file => ({
-      name: file,
-      downloadUrl: `${process.env.URL}/files/${file}`
-    }));
-    
+    // 在Netlify上返回空数组，因为Netlify的临时文件系统是只读的
+    // 实际项目中应该使用云存储服务
     return {
       statusCode: 200,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(files)
+      body: JSON.stringify([])
     };
   } catch (error) {
     console.error('Files error:', error);
