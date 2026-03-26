@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const Busboy = require('busboy');
 
 exports.handler = async (event, context) => {
@@ -10,25 +8,14 @@ exports.handler = async (event, context) => {
         headers: event.headers
       });
       
-      const uploadDir = path.join(process.cwd(), 'uploads');
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-      
       let fileName;
-      let fileData = [];
       
       busboy.on('file', (fieldname, file, info) => {
         fileName = Date.now() + '-' + info.filename;
-        const filePath = path.join(uploadDir, fileName);
-        const writeStream = fs.createWriteStream(filePath);
-        
+        // 在Netlify上，我们不能写入文件系统
+        // 实际项目中应该使用云存储服务
         file.on('data', (data) => {
-          writeStream.write(data);
-        });
-        
-        file.on('end', () => {
-          writeStream.end();
+          // 忽略文件数据
         });
       });
       
